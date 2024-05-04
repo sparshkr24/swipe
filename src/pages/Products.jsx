@@ -1,6 +1,10 @@
 import React from 'react'
+
+import Row from 'react-bootstrap/Row';
+
 import { useProductListData } from '../redux/hooks'
-import { Col, Row } from 'react-bootstrap';
+import ProductCard from '../components/ProductCard';
+import GoBackButton from '../ui/GoBackButton';
 
 const Products = () => {
   const { productList, isProductListEmpty } = useProductListData();
@@ -11,22 +15,12 @@ const Products = () => {
     )
   } else {
     return (
-      <div className='align-items-start'>
+      <div className='align-items-start p-4'>
+        <GoBackButton />
         <h1>Products</h1>
         <Row xs={1} sm={2} md={3} lg={4}>
-          {productList.map(({ name, desc, price }, index) => (
-            <Col key={index} className="mb-4">
-              <div className="product-card">
-                <div>
-                  <img src='' alt='img' />
-                </div>
-                <div>
-                  <strong>{name}</strong> <br />
-                  {desc} <br />
-                  Price: {price}
-                </div>
-              </div>
-            </Col>
+          {productList.map((product, index) => (
+            <ProductCard product={product} key={index} />
           ))}
         </Row>
       </div>
