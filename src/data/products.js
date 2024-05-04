@@ -44,3 +44,11 @@ export const dummyImages = [
 ]
 
 export const totalImages = dummyImages.length
+
+export const itemStructure = {
+  id: null,
+  name: "",
+  desc: "",
+  price: "",
+  quantity: ""
+}

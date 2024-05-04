@@ -1,19 +1,21 @@
 import React, { useState, useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { useParams, useLocation, useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
-import Row from "react-bootstrap/Row";
-import Col from "react-bootstrap/Col";
+
 import Button from "react-bootstrap/Button";
-import Form from "react-bootstrap/Form";
 import Card from "react-bootstrap/Card";
+import Col from "react-bootstrap/Col";
+import Form from "react-bootstrap/Form";
+import InputGroup from "react-bootstrap/InputGroup";
+import Row from "react-bootstrap/Row";
+
+import { addInvoice, updateInvoice } from "../redux/invoicesSlice";
+import { useInvoiceListData } from "../redux/hooks";
+import generateRandomId from "../utils/generateRandomId";
+import GoBackButton from "../ui/GoBackButton"
 import InvoiceItem from "./InvoiceItem";
 import InvoiceModal from "./InvoiceModal";
-import InputGroup from "react-bootstrap/InputGroup";
-import { useDispatch } from "react-redux";
-import { addInvoice, updateInvoice } from "../redux/invoicesSlice";
-import { useParams, useLocation, useNavigate } from "react-router-dom";
-import generateRandomId from "../utils/generateRandomId";
-import { useInvoiceListData } from "../redux/hooks";
-import GoBackButton from "../ui/GoBackButton"
 
 const InvoiceForm = () => {
   const dispatch = useDispatch();
@@ -25,7 +27,8 @@ const InvoiceForm = () => {
 
   const [isOpen, setIsOpen] = useState(false);
   const [copyId, setCopyId] = useState("");
-  const { getOneInvoice, listSize } = useInvoiceListData();
+  const { getOneInvoice, getAllProdutctsByInvoiceId, listSize } = useInvoiceListData();
+  const [allItems, setAllItems] = useState(getAllProdutctsByInvoiceId(params.id))
   const [formData, setFormData] = useState(
     isEdit
       ? getOneInvoice(params.id)
@@ -54,6 +57,7 @@ const InvoiceForm = () => {
           discountRate: "",
           discountAmount: "0.00",
           currency: "$",
+          products: [],
           items: [
             {
               itemId: 0,
@@ -70,29 +74,20 @@ const InvoiceForm = () => {
     handleCalculateTotal();
   }, []);
 
-  const handleRowDel = (itemToDelete) => {
-    const updatedItems = formData.items.filter(
-      (item) => item.itemId !== itemToDelete.itemId
-    );
-    setFormData({ ...formData, items: updatedItems });
-    handleCalculateTotal();
-  };
-
-  const handleAddEvent = () => {
-    const id = (+new Date() + Math.floor(Math.random() * 999999)).toString(36);
-    const newItem = {
-      itemId: id,
-      itemName: "",
-      itemDescription: "",
-      itemPrice: "1.00",
-      itemQuantity: 1,
-    };
-    setFormData({
-      ...formData,
-      items: [...formData.items, newItem],
+  useEffect(() => {
+    // Store only the itemId and quantity of each item in the Invoice store
+    // The Idea is to fetch the complete item details from Product store based on the itemId 
+    // to keep the data consistent across entire application
+    setFormData((prev) => {
+      return {
+        ...prev,
+        products: allItems.map(({ id, quantity }) => ({
+          id,
+          quantity
+        }))
+      };
     });
-    handleCalculateTotal();
-  };
+  }, [allItems]);
 
   const handleCalculateTotal = () => {
     setFormData((prevFormData) => {
@@ -123,18 +118,6 @@ const InvoiceForm = () => {
         total,
       };
     });
-  };
-
-  const onItemizedItemEdit = (evt, id) => {
-    const updatedItems = formData.items.map((oldItem) => {
-      if (oldItem.itemId === id) {
-        return { ...oldItem, [evt.target.name]: evt.target.value };
-      }
-      return oldItem;
-    });
-
-    setFormData({ ...formData, items: updatedItems });
-    handleCalculateTotal();
   };
 
   const editField = (name, value) => {
@@ -296,11 +279,10 @@ const InvoiceForm = () => {
                 </Col>
               </Row>
               <InvoiceItem
-                onItemizedItemEdit={onItemizedItemEdit}
-                onRowAdd={handleAddEvent}
-                onRowDel={handleRowDel}
+                allItems={allItems}
+                setAllItems={setAllItems}
                 currency={formData.currency}
-                items={formData.items}
+                invoiceId={formData.id}
               />
               <Row className="mt-4 justify-content-end">
                 <Col lg={6}>

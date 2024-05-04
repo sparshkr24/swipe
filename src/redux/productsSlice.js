@@ -5,22 +5,17 @@ const productsSlice = createSlice({
   name: "products",
   initialState: {
     data: [...dummyProducts],
-    isEditingOn: null
+    editItemId: null
   },
   reducers: {
     addProduct: (state, action) => {
-      const { name, desc, price } = action.payload;
-      const lastProductId = state.length > 0 ? state[state.length - 1].id : 0;
-      const newProduct = {
-        id: lastProductId + 1,
-        name,
-        desc,
-        price
-      };
-
+      const { newProduct } = action.payload;
       return {
         ...state,
-        data: [...state.data, newProduct]
+        data: [
+          ...state.data, 
+          newProduct
+        ]
       }
     },
     deleteProduct: (state, action) => {
@@ -32,8 +27,7 @@ const productsSlice = createSlice({
       }
     },
     updateProduct: (state, action) => {      
-      const updatedProduct = action.payload;
-      console.log("updatedProduct: ", updatedProduct);
+      const { updatedProduct } = action.payload;
       const index = state.data.findIndex((product) => product.id === updatedProduct.id);
 
       if (index !== -1) {
@@ -47,14 +41,14 @@ const productsSlice = createSlice({
         };
       }
     
-      return state; // Return the unchanged state if product not found
+      return state;
     },
     updateEditState: (state, action) => {
       const { value } = action.payload;
 
       return {
         ...state,
-        isEditingOn: value
+        editItemId: value
       }
     }
   },

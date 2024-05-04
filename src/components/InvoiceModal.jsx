@@ -1,13 +1,14 @@
 import React from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
-import Row from "react-bootstrap/Row";
-import Col from "react-bootstrap/Col";
-import Button from "react-bootstrap/Button";
-import Table from "react-bootstrap/Table";
-import Modal from "react-bootstrap/Modal";
+
 import { BiPaperPlane, BiCloudDownload } from "react-icons/bi";
+import Button from "react-bootstrap/Button";
+import Col from "react-bootstrap/Col";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
+import Modal from "react-bootstrap/Modal";
+import Row from "react-bootstrap/Row";
+import Table from "react-bootstrap/Table";
 
 const GenerateInvoice = () => {
   html2canvas(document.querySelector("#invoiceCapture")).then((canvas) => {

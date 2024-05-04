@@ -1,22 +1,49 @@
-import React from "react";
+import React, { useCallback, useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
 import "bootstrap/dist/css/bootstrap.min.css";
+
 import Table from "react-bootstrap/Table";
-import Button from "react-bootstrap/Button";
-import { BiTrash } from "react-icons/bi";
+import { FaPlus } from "react-icons/fa";
+
+import { addProduct } from "../redux/productsSlice";
+import { itemStructure } from "../data/products";
+import { useProductListData } from "../redux/hooks";
 import EditableField from "./EditableField";
+import InvoiceItemRow from "../ui/InvoiceItemRow";
 
-const InvoiceItem = (props) => {
-  const { onItemizedItemEdit, currency, onRowDel, items, onRowAdd } = props;
+const InvoiceItem = ({ allItems, setAllItems, currency, invoiceId }) => {
+  const dispatch = useDispatch()
+  const { lastProductId } = useProductListData()
+  const [currentItem, setCurrentItem] = useState(itemStructure)
 
-  const itemTable = items.map((item) => (
-    <ItemRow
-      key={item.id}
-      item={item}
-      onDelEvent={onRowDel}
-      onItemizedItemEdit={onItemizedItemEdit}
-      currency={currency}
-    />
-  ));
+  const handleSubmit = useCallback(() => {
+    // Setting proper Id for this product
+    setCurrentItem((prev) => {
+      return { ...prev, id: lastProductId + 1 };
+    });
+  }, [lastProductId]);
+
+  useEffect(() => {
+    if (currentItem.id) {
+      // Adding the product to the Product store
+      dispatch(addProduct({ newProduct: currentItem }));
+
+      setAllItems((prev) => {
+        return [
+          ...prev,
+          currentItem
+        ];
+      });
+
+      setCurrentItem(itemStructure);
+    }
+  }, [dispatch, currentItem, lastProductId, setAllItems, allItems]);
+  
+  const onChange = useCallback((e)=>{
+    setCurrentItem((prev)=>{
+      return {...prev, [e.target.name]: e.target.value}
+    })
+  }, [])
 
   return (
     <div>
@@ -29,85 +56,86 @@ const InvoiceItem = (props) => {
             <th className="text-center">ACTION</th>
           </tr>
         </thead>
-        <tbody>{itemTable}</tbody>
+        <tbody>
+          <ItemFormRow
+            item={currentItem}
+            currency={currency}
+            handleSubmit={handleSubmit}
+            onChange={onChange}
+          />
+          {allItems.map((product)=>{
+            return (
+              <InvoiceItemRow 
+                key={product.id} 
+                product={product} 
+                currency={currency}
+                allItems={allItems}
+                setAllItems={setAllItems}
+              />
+            )
+          })}
+        </tbody>
       </Table>
-      <Button className="fw-bold" onClick={onRowAdd}>
-        Add Item
-      </Button>
     </div>
   );
 };
 
-const ItemRow = (props) => {
-  const onDelEvent = () => {
-    props.onDelEvent(props.item);
-  };
+const ItemFormRow = (props) => {
   return (
     <tr>
       <td style={{ width: "100%" }}>
         <EditableField
-          onItemizedItemEdit={(evt) =>
-            props.onItemizedItemEdit(evt, props.item.itemId)
-          }
+          onItemizedItemEdit={props.onChange}
           cellData={{
             type: "text",
-            name: "itemName",
+            name: "name",
             placeholder: "Item name",
-            value: props.item.itemName,
-            id: props.item.itemId,
+            value: props.item.name,
           }}
         />
         <EditableField
-          onItemizedItemEdit={(evt) =>
-            props.onItemizedItemEdit(evt, props.item.itemId)
-          }
+          onItemizedItemEdit={props.onChange}
           cellData={{
             type: "text",
-            name: "itemDescription",
+            name: "desc",
             placeholder: "Item description",
-            value: props.item.itemDescription,
-            id: props.item.itemId,
+            value: props.item.desc,
           }}
         />
       </td>
       <td style={{ minWidth: "70px" }}>
         <EditableField
-          onItemizedItemEdit={(evt) =>
-            props.onItemizedItemEdit(evt, props.item.itemId)
-          }
+          onItemizedItemEdit={props.onChange}
           cellData={{
             type: "number",
-            name: "itemQuantity",
+            name: "quantity",
             min: 1,
             step: "1",
-            value: props.item.itemQuantity,
-            id: props.item.itemId,
+            value: props.item.quantity,
           }}
         />
       </td>
-      <td style={{ minWidth: "130px" }}>
+      <td style={{ minWidth: "115px" }}>
         <EditableField
-          onItemizedItemEdit={(evt) =>
-            props.onItemizedItemEdit(evt, props.item.itemId)
-          }
+          onItemizedItemEdit={props.onChange}
           cellData={{
             leading: props.currency,
             type: "number",
-            name: "itemPrice",
+            name: "price",
             min: 1,
             step: "0.01",
             presicion: 2,
             textAlign: "text-end",
-            value: props.item.itemPrice,
-            id: props.item.itemId,
+            placeholder: "Price",
+            value: props.item.price,
           }}
         />
       </td>
       <td className="text-center" style={{ minWidth: "50px" }}>
-        <BiTrash
-          onClick={onDelEvent}
+        <FaPlus
+          onClick={props.handleSubmit}
           style={{ height: "33px", width: "33px", padding: "7.5px" }}
-          className="text-white mt-1 btn btn-danger"
+          className="text-white mt-1 btn btn-primary"
         />
       </td>
     </tr>

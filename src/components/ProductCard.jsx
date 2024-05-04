@@ -1,22 +1,23 @@
 import React, { useCallback, useMemo, useState } from 'react'
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 
 import Card from 'react-bootstrap/Card';
 import Col from 'react-bootstrap/Col';
 import Form from 'react-bootstrap/Form';
 
+import { deleteProduct, updateEditState, updateProduct } from '../redux/productsSlice';
 import { dummyImages, totalImages } from '../data/products';
-import { deleteProduct, selectProductList, updateEditState, updateProduct } from '../redux/productsSlice';
-import EditButton from '../ui/EditButton';
+import { useProductListData } from '../redux/hooks';
 import CheckButton from '../ui/CheckButton';
 import DeleteButton from '../ui/DeleteButton';
+import EditButton from '../ui/EditButton';
 
 const ProductCard = ({ product }) => {
   const dispatch = useDispatch()
   const { id } = product
   const [onHoverIndex, setOnHoverIndex] = useState(null);
   const [editedProduct, setEditedProduct] = useState({ ...product });
-  const { isEditingOn } = useSelector(selectProductList)
+  const { productList, editItemId } = useProductListData()
 
   const handleCardHover = useCallback(() => {
     setOnHoverIndex(id);
@@ -29,7 +30,8 @@ const ProductCard = ({ product }) => {
   const handleEdit = useCallback((e) => {
     e.stopPropagation();
     dispatch(updateEditState({ value: id }))
-  }, [dispatch, id]);
+    setEditedProduct(productList.find((product) => product.id === id))
+  }, [dispatch, id, productList]);
 
   const handleDelete = useCallback(()=>{
     dispatch(deleteProduct({ id }))
@@ -42,18 +44,18 @@ const ProductCard = ({ product }) => {
 
   const handleSubmit = useCallback((e) => {
     e.stopPropagation();
-    dispatch(updateProduct({ id, ...editedProduct }));
+    dispatch(updateProduct({ updatedProduct: { id, ...editedProduct } }));
     dispatch(updateEditState({ value: null }));
   }, [dispatch, editedProduct, id])
 
   // Used useMemo to memoize computation to optimize performance
   const showEditButton = useMemo(()=>{
-    return !isEditingOn && onHoverIndex === id 
-  }, [isEditingOn, onHoverIndex, id])
+    return !editItemId && onHoverIndex === id 
+  }, [editItemId, onHoverIndex, id])
 
   const showCheckButton = useMemo(()=>{
-    return  isEditingOn === id
-  }, [isEditingOn, id])
+    return  editItemId === id
+  }, [editItemId, id])
 
   return (
     <Col key={id} className="mb-4">

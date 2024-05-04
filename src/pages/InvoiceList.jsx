@@ -2,14 +2,14 @@ import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 
-import { Button, ButtonGroup, Card, Col, Container, Row, Table } from "react-bootstrap";
 import { BiSolidPencil, BiTrash } from "react-icons/bi";
 import { BsEyeFill } from "react-icons/bs";
+import { Button, ButtonGroup, Card, Col, Container, Row, Table } from "react-bootstrap";
 
 import { deleteInvoice } from "../redux/invoicesSlice";
 import { useInvoiceListData } from "../redux/hooks";
-import InvoiceModal from "../components/InvoiceModal";
 import CreateInvoiceButton from "../ui/CreateInvoiceButton";
+import InvoiceModal from "../components/InvoiceModal";
 
 const InvoiceList = () => {
   const { invoiceList, getOneInvoice } = useInvoiceListData();
