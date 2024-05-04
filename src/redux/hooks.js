@@ -23,7 +23,7 @@ export const useInvoiceListData = () => {
 };
 
 export const useProductListData = () => {
-  const productList = useSelector(selectProductList);
+  const { data: productList, isEditingOn } = useSelector(selectProductList);
 
   const getProductsByIds = ({ productIds }) => {
     return (
@@ -38,6 +38,7 @@ export const useProductListData = () => {
   return {
     productList,
     getProductsByIds,
+    isEditingOn,
     isProductListEmpty,
   };
 };

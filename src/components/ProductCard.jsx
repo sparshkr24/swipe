@@ -1,0 +1,137 @@
+import React, { useCallback, useMemo, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux';
+
+import Card from 'react-bootstrap/Card';
+import Col from 'react-bootstrap/Col';
+import Form from 'react-bootstrap/Form';
+
+import { dummyImages, totalImages } from '../data/products';
+import { deleteProduct, selectProductList, updateEditState, updateProduct } from '../redux/productsSlice';
+import EditButton from '../ui/EditButton';
+import CheckButton from '../ui/CheckButton';
+import DeleteButton from '../ui/DeleteButton';
+
+const ProductCard = ({ product }) => {
+  const dispatch = useDispatch()
+  const { id } = product
+  const [onHoverIndex, setOnHoverIndex] = useState(null);
+  const [editedProduct, setEditedProduct] = useState({ ...product });
+  const { isEditingOn } = useSelector(selectProductList)
+
+  const handleCardHover = useCallback(() => {
+    setOnHoverIndex(id);
+  }, [id]);
+
+  const handleCardLeave = useCallback(() => {
+    setOnHoverIndex(null);
+  }, []);
+
+  const handleEdit = useCallback((e) => {
+    e.stopPropagation();
+    dispatch(updateEditState({ value: id }))
+  }, [dispatch, id]);
+
+  const handleDelete = useCallback(()=>{
+    dispatch(deleteProduct({ id }))
+  }, [dispatch, id])
+
+  const handleChange = useCallback((e) => {
+    const { name, value } = e.target;
+    setEditedProduct((prev) => ({ ...prev, [name]: value }));
+  }, []);
+
+  const handleSubmit = useCallback((e) => {
+    e.stopPropagation();
+    dispatch(updateProduct({ id, ...editedProduct }));
+    dispatch(updateEditState({ value: null }));
+  }, [dispatch, editedProduct, id])
+
+  // Used useMemo to memoize computation to optimize performance
+  const showEditButton = useMemo(()=>{
+    return !isEditingOn && onHoverIndex === id 
+  }, [isEditingOn, onHoverIndex, id])
+
+  const showCheckButton = useMemo(()=>{
+    return  isEditingOn === id
+  }, [isEditingOn, id])
+
+  return (
+    <Col key={id} className="mb-4">
+      <Card 
+        className='h-100'
+        onMouseEnter={() => handleCardHover(id)}
+        onMouseLeave={handleCardLeave}
+      >
+        <Card.Img variant="top" src={dummyImages[(id % totalImages)]} alt='img' />
+        {
+          showCheckButton ? (
+            <EditableProductCard editedProduct={editedProduct} handleChange={handleChange} />
+          ) : (
+            <NonEditableProductCard product={product} />
+          )
+        }
+
+        {/* If not editing any product => display edit icon when hovered over.
+            If editing a product => permanently dispaly check icon only over that product */}
+        { showEditButton ? (
+            <>
+              <EditButton handlerFunction={handleEdit} />
+              <DeleteButton handlerFunction={handleDelete} />
+            </>
+        ) : (
+          showCheckButton && <CheckButton handlerFunction={handleSubmit} />
+        )}
+      </Card>
+    </Col>
+  )
+}
+
+const EditableProductCard = ({ editedProduct, handleChange }) => {
+  const { name, desc, price } = editedProduct
+  return (
+    <Form>
+      <Card.Body>
+        <div className='d-flex flex-column justify-content-between h-100'>
+          <div>
+            <Card.Title>
+              <Form.Control name="name" value={name} onChange={handleChange} />
+            </Card.Title>
+            <Card.Text>
+              <Form.Control name="desc" value={desc} onChange={handleChange} as="textarea" rows={2}/>
+            </Card.Text>
+          </div>
+          <div></div>
+          <Card.Text>
+            <span className='d-flex align-items-center fw-bold mt-2 gap-2'>
+              Price: $<Form.Control name="price" value={price} onChange={handleChange} className='w-50' />
+            </span>
+          </Card.Text>
+        </div>
+      </Card.Body>
+    </Form>
+  )
+}
+
+const NonEditableProductCard = ({ product }) => {
+  const {name, desc, price} = product
+  return (
+    <Card.Body>
+      <div className='d-flex flex-column justify-content-between h-100'>
+        <div>
+          <Card.Title>{name}</Card.Title>
+          <Card.Text>
+            {desc}
+          </Card.Text>
+        </div>
+        <div></div>
+        <Card.Text>
+          <p className='fw-bold'>
+            Price: ${price}
+          </p>
+        </Card.Text>
+      </div>
+    </Card.Body>
+  )
+}
+
+export default ProductCard
