@@ -1,6 +1,6 @@
 import { useSelector } from "react-redux";
 
-import { selectInvoiceModal } from "./invoiceModal";
+import { selectInvoiceModalData } from "./invoiceModalSlice";
 import { selectInvoiceList } from "./invoicesSlice";
 import { selectProductList } from "./productsSlice";
 
@@ -67,7 +67,7 @@ export const useProductListData = () => {
 };
 
 export const useInvoiceModalData = () => {
-  const { isOpen, invoice, items } = useSelector(selectInvoiceModal);
+  const { isOpen, invoice, items } = useSelector(selectInvoiceModalData);
   const { getAllProductsByInvoiceId } = useInvoiceListData()
 
   const itemsFromInvoice = getAllProductsByInvoiceId(invoice?.id)

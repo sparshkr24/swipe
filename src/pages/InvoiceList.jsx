@@ -7,7 +7,7 @@ import { BsEyeFill } from "react-icons/bs";
 import { Button, ButtonGroup, Card, Col, Container, Row, Table } from "react-bootstrap";
 
 import { deleteInvoice } from "../redux/invoicesSlice";
-import { openInvoiceModal } from "../redux/invoiceModal";
+import { openInvoiceModal } from "../redux/invoiceModalSlice";
 import { useInvoiceListData } from "../redux/hooks";
 import CreateInvoiceButton from "../ui/CreateInvoiceButton";
 

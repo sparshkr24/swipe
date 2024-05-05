@@ -11,7 +11,7 @@ import Modal from "react-bootstrap/Modal";
 import Row from "react-bootstrap/Row";
 import Table from "react-bootstrap/Table";
 
-import { closeInvoiceModal } from "../redux/invoiceModal";
+import { closeInvoiceModal } from "../redux/invoiceModalSlice";
 import { useInvoiceModalData } from "../redux/hooks";
 
 const GenerateInvoice = () => {
@@ -103,7 +103,8 @@ const InvoiceModal = () => {
                       <tr id={i} key={i}>
                         <td style={{ width: "70px" }}>{item.quantity}</td>
                         <td>
-                          {item.name} - {item.desc}
+                          {item.name}
+                          {item.desc && ` - ${item.desc}`}
                         </td>
                         <td className="text-end" style={{ width: "100px" }}>
                           {invoice.currency} {item.price}

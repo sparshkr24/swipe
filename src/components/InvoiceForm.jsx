@@ -11,10 +11,10 @@ import InputGroup from "react-bootstrap/InputGroup";
 import Row from "react-bootstrap/Row";
 
 import { addInvoice, updateInvoice } from "../redux/invoicesSlice";
-import { calculateDiscount, calculateSubTotal, calculateTaxAmount } from "../utils/calculateTotal";
 import { currencyOptions } from "../data/constants";
 import { getInvoiceStructure } from "../data/invoice";
-import { openInvoiceModal } from "../redux/invoiceModal";
+import { handleCalculateTotal } from "../utils/calculateTotal";
+import { openInvoiceModal } from "../redux/invoiceModalSlice";
 import { useInvoiceListData } from "../redux/hooks";
 import generateRandomId from "../utils/generateRandomId";
 import GoBackButton from "../ui/GoBackButton"
@@ -65,37 +65,23 @@ const InvoiceForm = () => {
   }, [allItems]);
 
   useEffect(() => {
-    handleCalculateTotal();
+    updateTotalAmount();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allItems]);
+}, [allItems]);
 
-  const handleCalculateTotal = useCallback(() => {
-      setFormData((prevFormData) => {
-        const subTotal = calculateSubTotal({ items: allItems })
-        const taxAmount = calculateTaxAmount({ subTotal, taxRate: prevFormData.taxRate })
-        const discountAmount = calculateDiscount({ subTotal, discountRate: prevFormData.discountRate })
+  const updateTotalAmount = useCallback(() => {
+    setFormData(prevFormData => {
+        const dataAfterCalculation = handleCalculateTotal({ allItems, data: prevFormData });
 
-        const total = (
-          subTotal -
-          parseFloat(discountAmount) +
-          parseFloat(taxAmount)
-        ).toFixed(2);
+        dispatch(updateInvoice({ updatedInvoice: dataAfterCalculation }))
 
-        const newFormData = {
-          ...prevFormData,
-          subTotal: parseFloat(subTotal).toFixed(2),
-          taxAmount,
-          discountAmount,
-          total,
-        };
-  
-        return newFormData
+        return dataAfterCalculation
       });
-  }, [allItems]);
+  }, [allItems, dispatch]);
 
   const editField = (name, value) => {
     setFormData({ ...formData, [name]: value });
-    handleCalculateTotal();
+    updateTotalAmount();
   };
 
   const onCurrencyChange = (selectedOption) => {
@@ -104,16 +90,16 @@ const InvoiceForm = () => {
 
   const openModal = (event) => {
     event.preventDefault();
-    handleCalculateTotal();
+    updateTotalAmount();
     dispatch(openInvoiceModal({ invoice: formData, items: allItems }))
   };
 
   const handleAddInvoice = () => {
-    handleCalculateTotal()
+    updateTotalAmount()
     if (isEdit) {
       dispatch(updateInvoice({ updatedInvoice: formData }));
       alert("Invoice updated successfuly 🥳");
-    } else if (isCopy) {
+    } else if (isCopy && params.id) {
       dispatch(addInvoice({ id: generateRandomId(), ...formData }));
       alert("Invoice added successfuly 🥳");
     } else {

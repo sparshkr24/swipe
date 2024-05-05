@@ -8,10 +8,10 @@ import InputGroup from 'react-bootstrap/InputGroup'
 import { FaCheck } from 'react-icons/fa'
 import { BiSolidPencil, BiTrash } from 'react-icons/bi'
 
-import { updateEditState, updateProduct } from '../redux/productsSlice'
+import { deleteAssociatedId, updateEditState, updateProduct } from '../redux/productsSlice'
 import { useProductListData } from '../redux/hooks'
 
-const InvoiceItemRow = ({ product, currency, allItems, setAllItems }) => {
+const InvoiceItemRow = ({ product, currency, allItems, setAllItems, invoiceId }) => {
   const dispatch = useDispatch()
 
   const { editItemId } = useProductListData()
@@ -28,9 +28,10 @@ const InvoiceItemRow = ({ product, currency, allItems, setAllItems }) => {
   }, [dispatch])
 
   const handleDelete = useCallback((productId)=>{
+    dispatch(deleteAssociatedId({ productId, invoiceId }))
     const updatedAllItems = allItems.filter((item) => item.id !== productId)
     setAllItems(updatedAllItems)
-  }, [allItems, setAllItems])
+  }, [dispatch, allItems, setAllItems, invoiceId])
   
   const handleSubmit = useCallback(()=>{
     dispatch(updateEditState({ value: null }))
@@ -54,6 +55,7 @@ const InvoiceItemRow = ({ product, currency, allItems, setAllItems }) => {
         <div className="fw-bold d-inline-block mb-1">
           <Form.Control 
             className={`${!isEditingOn ? 'fw-bold' : 'border border-1'}`} 
+            type="text"
             readOnly={!isEditingOn} 
             name="name" 
             value={editedProduct.name} 
@@ -63,6 +65,7 @@ const InvoiceItemRow = ({ product, currency, allItems, setAllItems }) => {
         <div>
           <Form.Control 
             className={`${!isEditingOn ? 'fw-bold' : 'border border-1'}`} 
+            type="text"
             readOnly={!isEditingOn} 
             name="desc" 
             value={editedProduct.desc} 
@@ -75,6 +78,8 @@ const InvoiceItemRow = ({ product, currency, allItems, setAllItems }) => {
         <span className="d-flex justify-content-center fw-bold">
           <Form.Control 
             className={`${!isEditingOn ? 'fw-bold' : 'border border-1'}`} 
+            type="number"
+            min={1}
             readOnly={!isEditingOn} 
             name="quantity" 
             value={editedProduct.quantity} 
@@ -86,14 +91,17 @@ const InvoiceItemRow = ({ product, currency, allItems, setAllItems }) => {
         <span className="d-flex justify-content-center align-items-center fw-bold bg-light rounded">
           <InputGroup.Text className="fw-bold border-0 text-secondary px-2">
             <span
-              className="border border-2 border-secondary rounded-circle small"
+              className="border border-2 border-secondary rounded-circle d-flex align-items-center justify-content-center small"
               style={{ width: "20px", height: "20px" }}
             >
               {currency}
             </span>
           </InputGroup.Text>
           <Form.Control 
-            className={`${!isEditingOn ? 'fw-bold' : 'border border-1'}`} 
+            className={`${!isEditingOn ? 'fw-bold' : 'border border-1'}`}
+            type="number"
+            min={1}
+            presicion={2}
             readOnly={!isEditingOn} 
             name="price" 
             value={editedProduct.price} 

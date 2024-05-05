@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-const invoiceModal = createSlice({
+const invoiceModalSlice = createSlice({
   name: "invoiceModal",
   initialState: {
     isOpen: false,
@@ -30,8 +30,8 @@ const invoiceModal = createSlice({
 export const {
   openInvoiceModal,
   closeInvoiceModal,
-} = invoiceModal.actions;
+} = invoiceModalSlice.actions;
 
-export const selectInvoiceModal = (state) => state.invoiceModal;
+export const selectInvoiceModalData = (state) => state.invoiceModal;
 
-export default invoiceModal.reducer;
+export default invoiceModalSlice.reducer;

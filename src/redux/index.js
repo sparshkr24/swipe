@@ -1,6 +1,6 @@
 import { combineReducers } from "@reduxjs/toolkit";
 import invoicesReducer from "./invoicesSlice"; // Import your other reducers
-import invoiceModalReducer from "./invoiceModal";
+import invoiceModalReducer from "./invoiceModalSlice";
 import productsReducer from "./productsSlice"
 
 const rootReducer = combineReducers({

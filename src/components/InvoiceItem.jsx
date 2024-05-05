@@ -2,8 +2,9 @@ import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import "bootstrap/dist/css/bootstrap.min.css";
 
-import Table from "react-bootstrap/Table";
+import { Dropdown } from "react-bootstrap";
 import { FaPlus } from "react-icons/fa";
+import Table from "react-bootstrap/Table";
 
 import { addProduct } from "../redux/productsSlice";
 import { itemStructure } from "../data/products";
@@ -13,37 +14,56 @@ import InvoiceItemRow from "../ui/InvoiceItemRow";
 
 const InvoiceItem = ({ allItems, setAllItems, currency, invoiceId }) => {
   const dispatch = useDispatch()
-  const { lastProductId } = useProductListData()
+  const { productList, lastProductId } = useProductListData()
   const [currentItem, setCurrentItem] = useState(itemStructure)
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
   const handleSubmit = useCallback(() => {
-    // Setting proper Id for this product
-    setCurrentItem((prev) => {
-      return { ...prev, id: lastProductId + 1 };
-    });
-  }, [lastProductId]);
-
-  useEffect(() => {
-    if (currentItem.id) {
-      // Adding the product to the Product store
-      dispatch(addProduct({ newProduct: currentItem }));
-
-      setAllItems((prev) => {
-        return [
-          ...prev,
-          currentItem
-        ];
-      });
-
-      setCurrentItem(itemStructure);
-    }
-  }, [dispatch, currentItem, lastProductId, setAllItems, allItems]);
+    const newProductId = lastProductId + 1
+    let newItem = currentItem
   
-  const onChange = useCallback((e)=>{
-    setCurrentItem((prev)=>{
-      return {...prev, [e.target.name]: e.target.value}
+    if (!currentItem.id) {
+      newItem = { ...currentItem, id: newProductId }
+    }
+
+    dispatch(addProduct({ newProduct: newItem, invoiceId }));
+    setAllItems((prev) => {
+      return [
+        ...prev,
+        newItem
+      ];
+    });
+
+    setCurrentItem(itemStructure);
+  }, [dispatch, currentItem, setAllItems, lastProductId, invoiceId]);
+  
+  const onChange = useCallback((e) => {
+    const { name, value } = e.target
+    setCurrentItem((prev) => {
+      return {...prev, [name]: value}
     })
-  }, [])
+
+    if (name === "name") {
+      const filteredSuggestions = productList.filter((item) =>
+        item.name.toLowerCase().includes(value.toLowerCase())
+      );
+
+      setSuggestions(filteredSuggestions);
+      setShowSuggestions(true);
+    }
+  }, [productList])
+
+  const handleSuggestionClick = useCallback((item) => {
+    setCurrentItem(item);
+    setShowSuggestions(false);
+  },[setCurrentItem]);
+
+  useEffect(()=>{
+    if (!currentItem.name) {
+      setShowSuggestions(false)
+    }
+  }, [currentItem])
 
   return (
     <div>
@@ -62,6 +82,9 @@ const InvoiceItem = ({ allItems, setAllItems, currency, invoiceId }) => {
             currency={currency}
             handleSubmit={handleSubmit}
             onChange={onChange}
+            suggestions={suggestions}
+            showSuggestions={showSuggestions}
+            handleSuggestionClick={handleSuggestionClick}
           />
           {allItems.map((product)=>{
             return (
@@ -71,6 +94,7 @@ const InvoiceItem = ({ allItems, setAllItems, currency, invoiceId }) => {
                 currency={currency}
                 allItems={allItems}
                 setAllItems={setAllItems}
+                invoiceId={invoiceId}
               />
             )
           })}
@@ -93,6 +117,17 @@ const ItemFormRow = (props) => {
             value: props.item.name,
           }}
         />
+        {<Dropdown.Menu show={props.showSuggestions && props.suggestions.length}>
+          {props.suggestions.map((item) => (
+            <Dropdown.Item
+              key={item.id}
+              eventKey={item.id}
+              onClick={() => props.handleSuggestionClick(item)}
+            >
+              {item.name}
+            </Dropdown.Item>
+          ))}
+        </Dropdown.Menu>}
         <EditableField
           onItemizedItemEdit={props.onChange}
           cellData={{
