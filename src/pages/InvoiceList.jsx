@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -7,9 +7,9 @@ import { BsEyeFill } from "react-icons/bs";
 import { Button, ButtonGroup, Card, Col, Container, Row, Table } from "react-bootstrap";
 
 import { deleteInvoice } from "../redux/invoicesSlice";
+import { openInvoiceModal } from "../redux/invoiceModal";
 import { useInvoiceListData } from "../redux/hooks";
 import CreateInvoiceButton from "../ui/CreateInvoiceButton";
-import InvoiceModal from "../components/InvoiceModal";
 
 const InvoiceList = () => {
   const { invoiceList, getOneInvoice } = useInvoiceListData();
@@ -97,11 +97,11 @@ const InvoiceList = () => {
 };
 
 const InvoiceRow = ({ invoice, navigate }) => {
-  const [isOpen, setIsOpen] = useState(false);
   const dispatch = useDispatch();
 
-  const { getAllProductsByInvoiceId } = useInvoiceListData()
-  const allItems = getAllProductsByInvoiceId(invoice?.id)
+  const openModal = useCallback(() => {
+    dispatch(openInvoiceModal({ invoice }))
+  }, [dispatch, invoice]);
 
   const handleDeleteClick = (invoiceId) => {
     dispatch(deleteInvoice(invoiceId));
@@ -109,15 +109,6 @@ const InvoiceRow = ({ invoice, navigate }) => {
 
   const handleEditClick = () => {
     navigate(`/edit/${invoice.id}`);
-  };
-
-  const openModal = (event) => {
-    event.preventDefault();
-    setIsOpen(true);
-  };
-
-  const closeModal = () => {
-    setIsOpen(false);
   };
 
   return (
@@ -150,12 +141,6 @@ const InvoiceRow = ({ invoice, navigate }) => {
           </ButtonGroup>
         </td>
       </tr>
-      {isOpen && <InvoiceModal
-          showModal={isOpen}
-          closeModal={closeModal}
-          invoice={invoice}
-          items={allItems}
-        />}
     </>
   );
 };

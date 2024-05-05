@@ -14,11 +14,11 @@ import { addInvoice, updateInvoice } from "../redux/invoicesSlice";
 import { calculateDiscount, calculateSubTotal, calculateTaxAmount } from "../utils/calculateTotal";
 import { currencyOptions } from "../data/constants";
 import { getInvoiceStructure } from "../data/invoice";
+import { openInvoiceModal } from "../redux/invoiceModal";
 import { useInvoiceListData } from "../redux/hooks";
 import generateRandomId from "../utils/generateRandomId";
 import GoBackButton from "../ui/GoBackButton"
 import InvoiceItem from "./InvoiceItem";
-import InvoiceModal from "./InvoiceModal";
 
 const InvoiceForm = () => {
   const dispatch = useDispatch();
@@ -28,7 +28,6 @@ const InvoiceForm = () => {
   const isCopy = location.pathname.includes("create");
   const isEdit = location.pathname.includes("edit");
 
-  const [isOpen, setIsOpen] = useState(false);
   const [copyId, setCopyId] = useState("");
   const { getOneInvoice, getAllProductsByInvoiceId, listSize } = useInvoiceListData();
   const [allItems, setAllItems] = useState(getAllProductsByInvoiceId(params.id))
@@ -106,11 +105,7 @@ const InvoiceForm = () => {
   const openModal = (event) => {
     event.preventDefault();
     handleCalculateTotal();
-    setIsOpen(true);
-  };
-
-  const closeModal = () => {
-    setIsOpen(false);
+    dispatch(openInvoiceModal({ invoice: formData, items: allItems }))
   };
 
   const handleAddInvoice = () => {
@@ -326,12 +321,7 @@ const InvoiceForm = () => {
                 <Button variant="primary" type="submit" className="d-block w-100">
                   Review Invoice
                 </Button>
-                <InvoiceModal
-                  showModal={isOpen}
-                  closeModal={closeModal}
-                  invoice={formData}
-                  items={allItems}
-                />
+                
                 <Form.Group className="mb-3">
                   <Form.Label className="fw-bold">Currency:</Form.Label>
                   <Form.Select

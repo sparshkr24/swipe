@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useCallback } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { useDispatch } from "react-redux";
 
 import { BiPaperPlane, BiCloudDownload } from "react-icons/bi";
 import Button from "react-bootstrap/Button";
@@ -9,6 +10,9 @@ import jsPDF from "jspdf";
 import Modal from "react-bootstrap/Modal";
 import Row from "react-bootstrap/Row";
 import Table from "react-bootstrap/Table";
+
+import { closeInvoiceModal } from "../redux/invoiceModal";
+import { useInvoiceModalData } from "../redux/hooks";
 
 const GenerateInvoice = () => {
   html2canvas(document.querySelector("#invoiceCapture")).then((canvas) => {
@@ -27,13 +31,20 @@ const GenerateInvoice = () => {
   });
 };
 
-const InvoiceModal = ({ showModal, closeModal, invoice, items }) => {
+const InvoiceModal = () => {
+  const dispatch = useDispatch()
+  const { isOpen, invoice, items } = useInvoiceModalData();
+
+  const closeModalHandler = useCallback(() => {
+    dispatch(closeInvoiceModal())
+  }, [dispatch])
+
   if (invoice) {
     return (
-      <div>
+      <>
         <Modal
-          show={showModal}
-          onHide={closeModal}
+          show={isOpen}
+          onHide={closeModalHandler}
           size="lg"
           centered
         >
@@ -182,7 +193,7 @@ const InvoiceModal = ({ showModal, closeModal, invoice, items }) => {
           </div>
         </Modal>
         <hr className="mt-4 mb-3" />
-      </div>
+      </>
     );
   } else {
     return null
