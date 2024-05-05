@@ -46,6 +46,9 @@ const productsSlice = createSlice({
     updateEditState: (state, action) => {
       const { value } = action.payload;
 
+      // If one item is already in edit state, can't edit another item
+      if( value && state.editItemId ) return state
+    
       return {
         ...state,
         editItemId: value
