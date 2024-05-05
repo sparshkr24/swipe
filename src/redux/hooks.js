@@ -7,14 +7,13 @@ export const useInvoiceListData = () => {
   const { getProductById } = useProductListData();
 
   const getOneInvoice = (receivedId) => {
-    return (
-      invoiceList.find(
-        (invoice) => invoice.id.toString() === receivedId.toString()
-      ) || null
-    );
-  };
+    receivedId = parseInt(receivedId);
+    return invoiceList.find(
+      (invoice) => invoice.id === receivedId
+    ) || null;
+  };  
 
-  const getAllProdutctsByInvoiceId = (invoiceId) => {
+  const getAllProductsByInvoiceId = (invoiceId) => {
     const { products: invoiceProducts } = getOneInvoice(invoiceId) || {}
     const allProducts = invoiceProducts?.map(({ id, quantity }) => {
       const productFromStore = getProductById({ productId: id });
@@ -36,7 +35,7 @@ export const useInvoiceListData = () => {
   return {
     invoiceList,
     getOneInvoice,
-    getAllProdutctsByInvoiceId,
+    getAllProductsByInvoiceId,
     listSize,
   };
 };

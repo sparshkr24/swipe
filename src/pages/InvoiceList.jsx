@@ -100,6 +100,9 @@ const InvoiceRow = ({ invoice, navigate }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dispatch = useDispatch();
 
+  const { getAllProductsByInvoiceId } = useInvoiceListData()
+  const allItems = getAllProductsByInvoiceId(invoice?.id)
+
   const handleDeleteClick = (invoiceId) => {
     dispatch(deleteInvoice(invoiceId));
   };
@@ -150,33 +153,8 @@ const InvoiceRow = ({ invoice, navigate }) => {
       {isOpen && <InvoiceModal
           showModal={isOpen}
           closeModal={closeModal}
-          info={{
-            isOpen,
-            id: invoice.id,
-            currency: invoice.currency,
-            currentDate: invoice.currentDate,
-            invoiceNumber: invoice.invoiceNumber,
-            dateOfIssue: invoice.dateOfIssue,
-            billTo: invoice.billTo,
-            billToEmail: invoice.billToEmail,
-            billToAddress: invoice.billToAddress,
-            billFrom: invoice.billFrom,
-            billFromEmail: invoice.billFromEmail,
-            billFromAddress: invoice.billFromAddress,
-            notes: invoice.notes,
-            total: invoice.total,
-            subTotal: invoice.subTotal,
-            taxRate: invoice.taxRate,
-            taxAmount: invoice.taxAmount,
-            discountRate: invoice.discountRate,
-            discountAmount: invoice.discountAmount,
-          }}
-          items={invoice.items}
-          currency={invoice.currency}
-          subTotal={invoice.subTotal}
-          taxAmount={invoice.taxAmount}
-          discountAmount={invoice.discountAmount}
-          total={invoice.total}
+          invoice={invoice}
+          items={allItems}
         />}
     </>
   );

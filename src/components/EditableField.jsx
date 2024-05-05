@@ -29,7 +29,6 @@ const EditableField = (props) => {
         precision={props.cellData.precision}
         aria-label={props.cellData.name}
         onChange={props.onItemizedItemEdit}
-        required
       />
     </InputGroup>
   );
