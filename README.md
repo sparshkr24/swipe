@@ -50,4 +50,28 @@
   - ### Components folder
     - Those react components that interact with the redux store.
 
+## Redux stores
+
+#### Invoice store
+- [x] Storing only the productIds and quantity here, not the entire product. (to maintain consistency of product details)
+
+![invoiceStore](public/assets/invoiceStore.png)
+
+#### Product store
+- [x] Single source of truth for product details across the application. All details regarding products are fetched from here
+- [x] Also stores the associatedInvoiceIds - invoices that use this product
+
+![productStore](public/assets/productsStore.png)
+
+#### InvoiceModal store
+- [x] isOpen: tells if the modal is in open state or close (True/False)
+- [x] invoice: which invoice does the modal supposed to dispaly.
+
+![productStore](public/assets/invoiceModalStore.png)
+
+#### CurrencyExchange store
+
+![productStore](public/assets/currencyExchangeStore.png)
+
+---
 Looking forward for your feedback ✌️
