@@ -1,23 +1,24 @@
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 
-import { Button, ButtonGroup, Card, Col, Container, Row, Table } from "react-bootstrap";
 import { BiSolidPencil, BiTrash } from "react-icons/bi";
 import { BsEyeFill } from "react-icons/bs";
+import { Button, ButtonGroup, Card, Col, Container, Row, Table } from "react-bootstrap";
 
-import { deleteInvoice } from "../redux/invoicesSlice";
+import { deleteInvoice, updateInvoice } from "../redux/invoicesSlice";
+import { handleCalculateTotal } from "../utils/calculateTotal";
+import { openInvoiceModal } from "../redux/invoiceModalSlice";
 import { useInvoiceListData } from "../redux/hooks";
-import InvoiceModal from "../components/InvoiceModal";
 import CreateInvoiceButton from "../ui/CreateInvoiceButton";
 
 const InvoiceList = () => {
-  const { invoiceList, getOneInvoice } = useInvoiceListData();
+  const { invoiceList, getOneInvoice, getAllProductsByInvoiceId } = useInvoiceListData();
   const isListEmpty = invoiceList.length === 0;
   const [copyId, setCopyId] = useState("");
   const navigate = useNavigate();
   const handleCopyClick = () => {
-    const invoice = getOneInvoice(copyId);
+    const invoice = getOneInvoice({ invoiceId: copyId });
     if (!invoice) {
       alert("Please enter the valid invoice id.");
     } else {
@@ -82,6 +83,7 @@ const InvoiceList = () => {
                           key={invoice.id}
                           invoice={invoice}
                           navigate={navigate}
+                          getAllProductsByInvoiceId={getAllProductsByInvoiceId}
                         />
                       ))}
                     </tbody>
@@ -96,9 +98,12 @@ const InvoiceList = () => {
   );
 };
 
-const InvoiceRow = ({ invoice, navigate }) => {
-  const [isOpen, setIsOpen] = useState(false);
+const InvoiceRow = ({ invoice, navigate, getAllProductsByInvoiceId }) => {
   const dispatch = useDispatch();
+
+  const openModal = useCallback(() => {
+    dispatch(openInvoiceModal({ invoice }))
+  }, [dispatch, invoice]);
 
   const handleDeleteClick = (invoiceId) => {
     dispatch(deleteInvoice(invoiceId));
@@ -108,14 +113,13 @@ const InvoiceRow = ({ invoice, navigate }) => {
     navigate(`/edit/${invoice.id}`);
   };
 
-  const openModal = (event) => {
-    event.preventDefault();
-    setIsOpen(true);
-  };
-
-  const closeModal = () => {
-    setIsOpen(false);
-  };
+  useEffect(() => {
+    const allItems = getAllProductsByInvoiceId({ invoiceId: invoice.id })
+    const updatedInvoice = handleCalculateTotal({ allItems, data: invoice })
+    console.log("updatedInvoice: ", updatedInvoice);
+    dispatch(updateInvoice({ updatedInvoice }))
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dispatch])
 
   return (
     <>
@@ -147,37 +151,6 @@ const InvoiceRow = ({ invoice, navigate }) => {
           </ButtonGroup>
         </td>
       </tr>
-      {isOpen && <InvoiceModal
-          showModal={isOpen}
-          closeModal={closeModal}
-          info={{
-            isOpen,
-            id: invoice.id,
-            currency: invoice.currency,
-            currentDate: invoice.currentDate,
-            invoiceNumber: invoice.invoiceNumber,
-            dateOfIssue: invoice.dateOfIssue,
-            billTo: invoice.billTo,
-            billToEmail: invoice.billToEmail,
-            billToAddress: invoice.billToAddress,
-            billFrom: invoice.billFrom,
-            billFromEmail: invoice.billFromEmail,
-            billFromAddress: invoice.billFromAddress,
-            notes: invoice.notes,
-            total: invoice.total,
-            subTotal: invoice.subTotal,
-            taxRate: invoice.taxRate,
-            taxAmount: invoice.taxAmount,
-            discountRate: invoice.discountRate,
-            discountAmount: invoice.discountAmount,
-          }}
-          items={invoice.items}
-          currency={invoice.currency}
-          subTotal={invoice.subTotal}
-          taxAmount={invoice.taxAmount}
-          discountAmount={invoice.discountAmount}
-          total={invoice.total}
-        />}
     </>
   );
 };

@@ -1,13 +1,22 @@
-import React from 'react'
+import React, { useEffect } from 'react'
+import { useDispatch } from 'react-redux';
 
 import Row from 'react-bootstrap/Row';
 
+import { updateEditState } from '../redux/productsSlice';
 import { useProductListData } from '../redux/hooks'
-import ProductCard from '../components/ProductCard';
 import GoBackButton from '../ui/GoBackButton';
+import ProductCard from '../components/ProductCard';
 
 const Products = () => {
+  const dispatch = useDispatch()
   const { productList, isProductListEmpty } = useProductListData();
+
+  // If we leave Products page while editing a product, this cleanup function
+  // will make sure to reset the Editing state
+  useEffect(()=>{
+    return () => dispatch(updateEditState({ value: null }))
+  }, [dispatch])
 
   if(isProductListEmpty){
     return (

@@ -5,22 +5,37 @@ const productsSlice = createSlice({
   name: "products",
   initialState: {
     data: [...dummyProducts],
-    isEditingOn: null
+    editItemId: null
   },
   reducers: {
     addProduct: (state, action) => {
-      const { name, desc, price } = action.payload;
-      const lastProductId = state.length > 0 ? state[state.length - 1].id : 0;
-      const newProduct = {
-        id: lastProductId + 1,
-        name,
-        desc,
-        price
-      };
+      const { newProduct, invoiceId } = action.payload;
+      const { id, name, desc, price } = newProduct
 
-      return {
-        ...state,
-        data: [...state.data, newProduct]
+      const existingProductIndex = state.data.findIndex((item) => item.id === id)
+
+      // If product already exists, then don't add duplicate
+      if(existingProductIndex !== -1) {
+        const updatedData = [...state.data]
+        const existingProduct = updatedData[existingProductIndex]
+
+        // append the associated invoiceId in the existing product
+        const updatedProduct = { id, name, desc, price, associatedInvoiceIds: [...existingProduct.associatedInvoiceIds, invoiceId]}
+        updatedData[existingProductIndex] = updatedProduct
+        
+        return {
+          ...state,
+          data: updatedData
+        }
+      } else {
+        return {
+          // otherwise append invoiceId in new product and add it to the store
+          ...state,
+          data: [
+            ...state.data, 
+            { id, name, desc, price, associatedInvoiceIds: [invoiceId] }
+          ]
+        }
       }
     },
     deleteProduct: (state, action) => {
@@ -31,15 +46,23 @@ const productsSlice = createSlice({
         data: updatedData
       }
     },
+    deleteAssociatedId: (state, action) => {
+      const { productId, invoiceId } = action.payload
+      const productIndex = state.data.findIndex((product) => product.id === productId);
+
+      const product = state.data[productIndex];
+      product.associatedInvoiceIds = product.associatedInvoiceIds.filter(id => id !== invoiceId);
+
+      return state
+    },
     updateProduct: (state, action) => {      
-      const updatedProduct = action.payload;
-      console.log("updatedProduct: ", updatedProduct);
+      const { updatedProduct } = action.payload;
+      const { id, name, desc, price } = updatedProduct
       const index = state.data.findIndex((product) => product.id === updatedProduct.id);
 
       if (index !== -1) {
-        // Update the product in the array without mutating it
         const updatedData = [...state.data];
-        updatedData[index] = updatedProduct;
+        updatedData[index] = { ...updatedData[index], id, name, desc, price };
     
         return {
           ...state,
@@ -47,14 +70,17 @@ const productsSlice = createSlice({
         };
       }
     
-      return state; // Return the unchanged state if product not found
+      return state;
     },
     updateEditState: (state, action) => {
       const { value } = action.payload;
 
+      // If one item is already in edit state, can't edit another item
+      if( value && state.editItemId ) return state
+    
       return {
         ...state,
-        isEditingOn: value
+        editItemId: value
       }
     }
   },
@@ -65,8 +91,10 @@ export const {
   deleteProduct,
   updateProduct,
   updateEditState,
+  deleteAssociatedId
 } = productsSlice.actions;
 
 export const selectProductList = (state) => state.products;
+export const productSliceInitialState = productsSlice.initialState
 
 export default productsSlice.reducer;

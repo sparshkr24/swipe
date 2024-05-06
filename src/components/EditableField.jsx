@@ -1,5 +1,6 @@
 import React from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
+
 import Form from "react-bootstrap/Form";
 import InputGroup from "react-bootstrap/InputGroup";
 
@@ -28,7 +29,6 @@ const EditableField = (props) => {
         precision={props.cellData.precision}
         aria-label={props.cellData.name}
         onChange={props.onItemizedItemEdit}
-        required
       />
     </InputGroup>
   );

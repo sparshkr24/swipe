@@ -11,12 +11,16 @@ const invoicesSlice = createSlice({
       return state.filter((invoice) => invoice.id !== action.payload);
     },
     updateInvoice: (state, action) => {
-      const index = state.findIndex(
-        (invoice) => invoice.id === action.payload.id
-      );
+      const { updatedInvoice } = action.payload;
+      const newState = [...state];
+      const index = newState.findIndex((invoice) => {
+        return invoice.id === updatedInvoice?.id
+      });
+
       if (index !== -1) {
-        state[index] = action.payload.updatedInvoice;
+        newState[index] = updatedInvoice;
       }
+      return newState;
     },
   },
 });
