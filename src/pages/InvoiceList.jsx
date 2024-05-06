@@ -12,6 +12,7 @@ import { openInvoiceModal } from "../redux/invoiceModalSlice";
 import { useInvoiceListData } from "../redux/hooks";
 import CopyInvoiceButton from "../ui/CopyInvoiceButton";
 import CreateInvoiceButton from "../ui/CreateInvoiceButton";
+import { toast } from 'react-hot-toast';
 
 const InvoiceList = () => {
   const { invoiceList, getOneInvoice, getAllProductsByInvoiceId } = useInvoiceListData();
@@ -21,8 +22,9 @@ const InvoiceList = () => {
   const handleCopyClick = () => {
     const invoice = getOneInvoice({ invoiceId: copyId });
     if (!invoice) {
-      alert("Please enter the valid invoice id.");
+      toast.error(`Invoice not found for id: ${copyId}`)
     } else {
+      toast.success("Invoice copied successfully")
       navigate(`/create/${copyId}`);
     }
   };
@@ -120,6 +122,7 @@ const InvoiceRow = ({ invoice, navigate, getAllProductsByInvoiceId }) => {
 
   const handleDeleteClick = (invoiceId) => {
     dispatch(deleteInvoice(invoiceId));
+    toast.success("Deleted successfully")
   };
 
   const handleEditClick = () => {

@@ -1,6 +1,7 @@
 import React, { useCallback, useMemo, useState } from 'react'
 import { useDispatch } from 'react-redux';
 
+import toast from 'react-hot-toast';
 import Card from 'react-bootstrap/Card';
 import Col from 'react-bootstrap/Col';
 import Form from 'react-bootstrap/Form';
@@ -35,6 +36,7 @@ const ProductCard = ({ product }) => {
 
   const handleDelete = useCallback(()=>{
     dispatch(deleteProduct({ id }))
+    toast.success("Product deleted for all invoices")
   }, [dispatch, id])
 
   const handleChange = useCallback((e) => {
@@ -46,6 +48,7 @@ const ProductCard = ({ product }) => {
     e.stopPropagation();
     dispatch(updateProduct({ updatedProduct: { id, ...editedProduct } }));
     dispatch(updateEditState({ value: null }));
+    toast.success("Product updated for all invoices")
   }, [dispatch, editedProduct, id])
 
   // Used useMemo to memoize computation to optimize performance
