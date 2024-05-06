@@ -1,4 +1,5 @@
 export const HOME_PAGE_URL = "/"
+export const CURRENCY_EXCHANGE_API = "https://api.freecurrencyapi.com/v1/latest?apikey=fca_live_Uy3jyLiaj5DByYdpyv0DtZBPMn9NhuhYMGWTwsu6"
 
 export const currencyOptions = [
   { value: '$', label: 'USD (United States Dollar)' },

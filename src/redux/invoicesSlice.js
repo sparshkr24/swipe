@@ -14,7 +14,7 @@ const invoicesSlice = createSlice({
       const { updatedInvoice } = action.payload;
       const newState = [...state];
       const index = newState.findIndex((invoice) => {
-        return invoice.id === updatedInvoice.id
+        return invoice.id === updatedInvoice?.id
       });
 
       if (index !== -1) {

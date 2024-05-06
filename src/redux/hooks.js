@@ -8,15 +8,15 @@ export const useInvoiceListData = () => {
   const invoiceList = useSelector(selectInvoiceList);
   const { getProductById } = useProductListData();
 
-  const getOneInvoice = (receivedId) => {
-    receivedId = parseInt(receivedId);
+  const getOneInvoice = ({ invoiceId }) => {
+    invoiceId = parseInt(invoiceId);
     return invoiceList.find(
-      (invoice) => invoice.id === receivedId
+      (invoice) => invoice.id === invoiceId
     ) || null;
   };  
 
-  const getAllProductsByInvoiceId = (invoiceId) => {
-    const { products: invoiceProducts } = getOneInvoice(invoiceId) || {}
+  const getAllProductsByInvoiceId = ({ invoiceId }) => {
+    const { products: invoiceProducts } = getOneInvoice({ invoiceId }) || {}
     const allProducts = invoiceProducts?.map(({ id, quantity }) => {
       const productFromStore = getProductById({ productId: id });
       if (productFromStore) {
@@ -70,7 +70,7 @@ export const useInvoiceModalData = () => {
   const { isOpen, invoice, items } = useSelector(selectInvoiceModalData);
   const { getAllProductsByInvoiceId } = useInvoiceListData()
 
-  const itemsFromInvoice = getAllProductsByInvoiceId(invoice?.id)
+  const itemsFromInvoice = getAllProductsByInvoiceId({ invoiceId: invoice?.id })
   
   return {
     isOpen,

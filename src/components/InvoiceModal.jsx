@@ -130,7 +130,7 @@ const InvoiceModal = () => {
                       TAX
                     </td>
                     <td className="text-end" style={{ width: "100px" }}>
-                      {invoice.currency} {invoice.taxAmount}
+                      {`(${invoice.taxRate || 0}%)`} {invoice.currency} {invoice.taxAmount}
                     </td>
                   </tr>
                   {invoice.discountAmmount !== 0.0 && (
@@ -140,7 +140,7 @@ const InvoiceModal = () => {
                         DISCOUNT
                       </td>
                       <td className="text-end" style={{ width: "100px" }}>
-                        {invoice.currency} {invoice.discountAmount}
+                        {`(${invoice.discountRate || 0}%)`} {invoice.currency} {invoice.discountAmount}
                       </td>
                     </tr>
                   )}

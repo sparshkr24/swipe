@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -6,18 +6,19 @@ import { BiSolidPencil, BiTrash } from "react-icons/bi";
 import { BsEyeFill } from "react-icons/bs";
 import { Button, ButtonGroup, Card, Col, Container, Row, Table } from "react-bootstrap";
 
-import { deleteInvoice } from "../redux/invoicesSlice";
+import { deleteInvoice, updateInvoice } from "../redux/invoicesSlice";
+import { handleCalculateTotal } from "../utils/calculateTotal";
 import { openInvoiceModal } from "../redux/invoiceModalSlice";
 import { useInvoiceListData } from "../redux/hooks";
 import CreateInvoiceButton from "../ui/CreateInvoiceButton";
 
 const InvoiceList = () => {
-  const { invoiceList, getOneInvoice } = useInvoiceListData();
+  const { invoiceList, getOneInvoice, getAllProductsByInvoiceId } = useInvoiceListData();
   const isListEmpty = invoiceList.length === 0;
   const [copyId, setCopyId] = useState("");
   const navigate = useNavigate();
   const handleCopyClick = () => {
-    const invoice = getOneInvoice(copyId);
+    const invoice = getOneInvoice({ invoiceId: copyId });
     if (!invoice) {
       alert("Please enter the valid invoice id.");
     } else {
@@ -82,6 +83,7 @@ const InvoiceList = () => {
                           key={invoice.id}
                           invoice={invoice}
                           navigate={navigate}
+                          getAllProductsByInvoiceId={getAllProductsByInvoiceId}
                         />
                       ))}
                     </tbody>
@@ -96,7 +98,7 @@ const InvoiceList = () => {
   );
 };
 
-const InvoiceRow = ({ invoice, navigate }) => {
+const InvoiceRow = ({ invoice, navigate, getAllProductsByInvoiceId }) => {
   const dispatch = useDispatch();
 
   const openModal = useCallback(() => {
@@ -110,6 +112,14 @@ const InvoiceRow = ({ invoice, navigate }) => {
   const handleEditClick = () => {
     navigate(`/edit/${invoice.id}`);
   };
+
+  useEffect(() => {
+    const allItems = getAllProductsByInvoiceId({ invoiceId: invoice.id })
+    const updatedInvoice = handleCalculateTotal({ allItems, data: invoice })
+    console.log("updatedInvoice: ", updatedInvoice);
+    dispatch(updateInvoice({ updatedInvoice }))
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dispatch])
 
   return (
     <>

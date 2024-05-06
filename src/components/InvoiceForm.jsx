@@ -12,6 +12,7 @@ import Row from "react-bootstrap/Row";
 
 import { addInvoice, updateInvoice } from "../redux/invoicesSlice";
 import { currencyOptions } from "../data/constants";
+import { getCurrencyExchangeData } from "../redux/currencyExchangeSlice";
 import { getInvoiceStructure } from "../data/invoice";
 import { handleCalculateTotal } from "../utils/calculateTotal";
 import { openInvoiceModal } from "../redux/invoiceModalSlice";
@@ -30,18 +31,22 @@ const InvoiceForm = () => {
 
   const [copyId, setCopyId] = useState("");
   const { getOneInvoice, getAllProductsByInvoiceId, listSize } = useInvoiceListData();
-  const [allItems, setAllItems] = useState(getAllProductsByInvoiceId(params.id))
+  const [allItems, setAllItems] = useState(getAllProductsByInvoiceId({ invoiceId: params.id }))
   const [formData, setFormData] = useState(
     isEdit
-      ? getOneInvoice(params.id)
+      ? getOneInvoice({ invoiceId: params.id })
       : isCopy && params.id
       ? {
-          ...getOneInvoice(params.id),
+          ...getOneInvoice({ invoiceId: params.id }),
           id: generateRandomId(),
           invoiceNumber: listSize + 1,
         }
       : getInvoiceStructure(listSize)
   );
+
+  useEffect(() => {
+    dispatch(getCurrencyExchangeData());
+  }, [dispatch]); 
 
   useEffect(()=>{
     if (!formData?.id) {
