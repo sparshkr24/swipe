@@ -3,6 +3,7 @@ import { useDispatch } from "react-redux";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 
+import toast from "react-hot-toast";
 import Button from "react-bootstrap/Button";
 import Card from "react-bootstrap/Card";
 import Col from "react-bootstrap/Col";
@@ -18,6 +19,7 @@ import { getInvoiceStructure } from "../data/invoice";
 import { handleCalculateTotal } from "../utils/calculateTotal";
 import { openInvoiceModal } from "../redux/invoiceModalSlice";
 import { useCurrencyExchangeData, useInvoiceListData } from "../redux/hooks";
+import { validateInvoiceData } from "../utils/validateData";
 import generateRandomId from "../utils/generateRandomId";
 import GoBackButton from "../ui/GoBackButton"
 import InvoiceItem from "./InvoiceItem";
@@ -111,15 +113,21 @@ const InvoiceForm = () => {
 
   const handleAddInvoice = () => {
     updateTotalAmount()
+    const { isValid, message } = validateInvoiceData({ invoice: formData })
+    if (!isValid){
+      toast.error(message)
+      return;
+    }
+    
     if (isEdit) {
       dispatch(updateInvoice({ updatedInvoice: formData }));
-      alert("Invoice updated successfuly 🥳");
+      toast.success("Invoice updated successfuly 🥳")
     } else if (isCopy && params.id) {
       dispatch(addInvoice({ id: generateRandomId(), ...formData }));
-      alert("Invoice added successfuly 🥳");
+      toast.success("Invoice added successfully")
     } else {
       dispatch(addInvoice(formData));
-      alert("Invoice added successfuly 🥳");
+      toast.success("Invoice added successfully")
     }
     navigate("/");
   };
@@ -132,8 +140,9 @@ const InvoiceForm = () => {
         id: formData.id,
         invoiceNumber: formData.invoiceNumber,
       });
+      toast.success("Invoice copied successfully")
     } else {
-      alert("Invoice does not exists!!!!!");
+      toast.error("Invoice does not exists!!!!!")
     }
   };
 

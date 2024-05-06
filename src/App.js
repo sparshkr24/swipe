@@ -4,11 +4,9 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
 
 import Container from "react-bootstrap/Container";
-// import Invoice from "./pages/Invoice";
-// import InvoiceList from "./pages/InvoiceList";
 import InvoiceModal from "./components/InvoiceModal";
-// import Products from "./pages/Products";
 import { routes } from "./data/routes";
+import { Toaster } from 'react-hot-toast'
 
 const App = () => {
   return (
@@ -26,6 +24,7 @@ const App = () => {
 
       {/* Render all Modals here */}
       <InvoiceModal />
+      <Toaster />
     </Container>
   );
 };
