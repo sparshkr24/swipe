@@ -86,11 +86,11 @@ const InvoiceItem = ({ allItems, setAllItems, currency, invoiceId }) => {
             showSuggestions={showSuggestions}
             handleSuggestionClick={handleSuggestionClick}
           />
-          {allItems.map((product)=>{
+          {allItems.map((item)=>{
             return (
               <InvoiceItemRow 
-                key={product.id} 
-                product={product} 
+                key={item.id} 
+                item={item} 
                 currency={currency}
                 allItems={allItems}
                 setAllItems={setAllItems}

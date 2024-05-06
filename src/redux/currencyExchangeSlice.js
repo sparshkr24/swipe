@@ -6,7 +6,7 @@ export const getCurrencyExchangeData = createAsyncThunk(
   async () => {
     const response = await fetch(CURRENCY_EXCHANGE_API);
     const data = await response.json();
-    return data;
+    return data.data;
   }
 );
 
@@ -36,5 +36,7 @@ const currencyExchangeSlice = createSlice({
       });
   }
 });
+
+export const selectCurrencyExchange = (state) => state.currencyExchange;
 
 export default currencyExchangeSlice.reducer;

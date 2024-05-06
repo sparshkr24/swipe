@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useDispatch } from 'react-redux'
 
 import Button from 'react-bootstrap/Button'
@@ -8,14 +8,18 @@ import InputGroup from 'react-bootstrap/InputGroup'
 import { FaCheck } from 'react-icons/fa'
 import { BiSolidPencil, BiTrash } from 'react-icons/bi'
 
+import { currencyExchange } from '../utils/currencyExchange'
+import { currencySymbolMapping } from '../data/constants'
 import { deleteAssociatedId, updateEditState, updateProduct } from '../redux/productsSlice'
+import { useCurrencyExchangeData } from '../redux/hooks'
 import { useProductListData } from '../redux/hooks'
 
-const InvoiceItemRow = ({ product, currency, allItems, setAllItems, invoiceId }) => {
+const InvoiceItemRow = ({ item, currency, allItems, setAllItems, invoiceId }) => {
   const dispatch = useDispatch()
 
+  const { exchangeRate } = useCurrencyExchangeData()
   const { editItemId } = useProductListData()
-  const [editedProduct, setEditedProduct] = useState(product)
+  const [editedProduct, setEditedProduct] = useState(item)
 
   const onChange = useCallback((e)=>{
     setEditedProduct((prev)=>{
@@ -33,9 +37,17 @@ const InvoiceItemRow = ({ product, currency, allItems, setAllItems, invoiceId })
     setAllItems(updatedAllItems)
   }, [dispatch, allItems, setAllItems, invoiceId])
   
-  const handleSubmit = useCallback(()=>{
+  const handleSubmit = useCallback(() => {
     dispatch(updateEditState({ value: null }))
-    dispatch(updateProduct({ updatedProduct: editedProduct }))
+    let afterConversion = editedProduct
+    if (exchangeRate) {
+        afterConversion = currencyExchange({ 
+        fromCurrency: exchangeRate[currencySymbolMapping[currency]], 
+        toCurrency: 1, 
+        data: editedProduct 
+      })
+    }
+    dispatch(updateProduct({ updatedProduct: afterConversion }))
     const index = allItems.findIndex(item => item.id === editedProduct.id);
 
     if (index !== -1) {
@@ -43,14 +55,18 @@ const InvoiceItemRow = ({ product, currency, allItems, setAllItems, invoiceId })
       updatedAllItems[index] = editedProduct;
       setAllItems(updatedAllItems);
     }
-  }, [dispatch, allItems, editedProduct, setAllItems])
+  }, [dispatch, allItems, editedProduct, setAllItems, currency, exchangeRate])
 
   const isEditingOn = useMemo(() => {
-    return editItemId === product.id
-  }, [editItemId, product])
+    return editItemId === item.id
+  }, [editItemId, item])
+
+  useEffect(()=>{
+    setEditedProduct(item)
+  }, [item])
 
   return (
-    <tr key={product.id}>
+    <tr key={item.id}>
       <td>
         <div className="fw-bold d-inline-block mb-1">
           <Form.Control 
@@ -91,7 +107,7 @@ const InvoiceItemRow = ({ product, currency, allItems, setAllItems, invoiceId })
         <span className="d-flex justify-content-center align-items-center fw-bold bg-light rounded">
           <InputGroup.Text className="fw-bold border-0 text-secondary px-2">
             <span
-              className="border border-2 border-secondary rounded-circle d-flex align-items-center justify-content-center small"
+              className="d-flex align-items-center justify-content-center small"
               style={{ width: "20px", height: "20px" }}
             >
               {currency}
@@ -115,13 +131,13 @@ const InvoiceItemRow = ({ product, currency, allItems, setAllItems, invoiceId })
             <Button variant="btn" className="bg-light" onClick={handleSubmit}>
               <FaCheck />
             </Button>
-            : <Button variant="btn" className="bg-light" onClick={() => handleEdit(product.id)}>
+            : <Button variant="btn" className="bg-light" onClick={() => handleEdit(item.id)}>
                 <BiSolidPencil />
               </Button>
           }
           <Button 
             variant="btn btn-danger"
-            onClick={() => handleDelete(product.id)}
+            onClick={() => handleDelete(item.id)}
           >
             <BiTrash />
           </Button>
