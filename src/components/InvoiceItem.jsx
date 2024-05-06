@@ -77,7 +77,7 @@ const InvoiceItem = ({ allItems, setAllItems, currency, invoiceId }) => {
   }, [currentItem])
 
   return (
-    <div>
+    <div className="overflow-x-auto">
       <Table>
         <thead>
           <tr>
@@ -118,7 +118,7 @@ const InvoiceItem = ({ allItems, setAllItems, currency, invoiceId }) => {
 const ItemFormRow = (props) => {
   return (
     <tr>
-      <td style={{ width: "100%" }}>
+      <td style={{ width: "100%", minWidth: '120px' }}>
         <EditableField
           onItemizedItemEdit={props.onChange}
           cellData={{
@@ -161,7 +161,7 @@ const ItemFormRow = (props) => {
           }}
         />
       </td>
-      <td style={{ minWidth: "115px" }}>
+      <td style={{ minWidth: "130px" }}>
         <EditableField
           onItemizedItemEdit={props.onChange}
           cellData={{

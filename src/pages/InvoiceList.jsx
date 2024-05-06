@@ -10,6 +10,7 @@ import { deleteInvoice, updateInvoice } from "../redux/invoicesSlice";
 import { handleCalculateTotal } from "../utils/calculateTotal";
 import { openInvoiceModal } from "../redux/invoiceModalSlice";
 import { useInvoiceListData } from "../redux/hooks";
+import CopyInvoiceButton from "../ui/CopyInvoiceButton";
 import CreateInvoiceButton from "../ui/CreateInvoiceButton";
 
 const InvoiceList = () => {
@@ -30,7 +31,7 @@ const InvoiceList = () => {
     <div className="App d-flex flex-column align-items-center justify-content-center w-100">
       <Container>
         <Row>
-          <Col className="mx-auto" xs={12} md={8} lg={9}>
+          <Col className="mx-auto" xs={12} md={12} lg={9}>
             <h3 className="fw-bold pb-2 pb-md-4 text-center">Swipe Assignment</h3>
             <Card className="d-flex p-3 p-md-4 my-3 my-md-4 ">
               {isListEmpty ? (
@@ -45,7 +46,15 @@ const InvoiceList = () => {
                   <div className="d-flex flex-row align-items-center justify-content-between mb-2">
                     <div className="d-flex flex-row align-items-center gap-3">
                       <h3 className="fw-bold">Invoice List</h3>
-                      <CreateInvoiceButton />
+                      <div className="d-none d-md-block">
+                        <CreateInvoiceButton />
+                      </div>
+                    </div>
+                    <div className="position-fixed bottom-0 end-0 p-3 d-md-none">
+                      <div className="d-flex flex-column gap-2">
+                        <CopyInvoiceButton getOneInvoice={getOneInvoice} />
+                        <CreateInvoiceButton />
+                      </div>
                     </div>
 
                     <div className="d-flex gap-2">
@@ -54,40 +63,44 @@ const InvoiceList = () => {
                           Products
                         </Button>
                       </Link>
-                      <Button variant="dark" onClick={handleCopyClick}>
-                        Copy Invoice
-                      </Button>
+                      <div className="d-none d-md-flex gap-2">
+                        <Button variant="dark d-none d-md-block" onClick={handleCopyClick}>
+                          Copy Invoice
+                        </Button>
 
-                      <input
-                        type="text"
-                        value={copyId}
-                        onChange={(e) => setCopyId(e.target.value)}
-                        placeholder="Enter Invoice ID to copy"
-                        className="bg-white border"
-                      />
+                        <input
+                          type="text"
+                          value={copyId}
+                          onChange={(e) => setCopyId(e.target.value)}
+                          placeholder="Enter Invoice ID to copy"
+                          className="bg-white border"
+                        />
+                      </div>
                     </div>
                   </div>
-                  <Table>
-                    <thead>
-                      <tr>
-                        <th>Invoice No.</th>
-                        <th>Bill To</th>
-                        <th>Due Date</th>
-                        <th>Total Amt.</th>
-                        <th>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {invoiceList.map((invoice) => (
-                        <InvoiceRow
-                          key={invoice.id}
-                          invoice={invoice}
-                          navigate={navigate}
-                          getAllProductsByInvoiceId={getAllProductsByInvoiceId}
-                        />
-                      ))}
-                    </tbody>
-                  </Table>
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <thead>
+                        <tr>
+                          <th>Invoice No.</th>
+                          <th>Bill To</th>
+                          <th>Due Date</th>
+                          <th>Total Amt.</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {invoiceList.map((invoice) => (
+                          <InvoiceRow
+                            key={invoice.id}
+                            invoice={invoice}
+                            navigate={navigate}
+                            getAllProductsByInvoiceId={getAllProductsByInvoiceId}
+                          />
+                        ))}
+                      </tbody>
+                    </Table>
+                  </div>
                 </div>
               )}
             </Card>
