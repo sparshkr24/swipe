@@ -5,6 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { BiSolidPencil, BiTrash } from "react-icons/bi";
 import { BsEyeFill } from "react-icons/bs";
 import { Button, ButtonGroup, Card, Col, Container, Row, Table } from "react-bootstrap";
+import { FaExternalLinkAlt } from "react-icons/fa";
 
 import { deleteInvoice, updateInvoice } from "../redux/invoicesSlice";
 import { handleCalculateTotal } from "../utils/calculateTotal";
@@ -39,9 +40,17 @@ const InvoiceList = () => {
               {isListEmpty ? (
                 <div className="d-flex flex-column align-items-center">
                   <h3 className="fw-bold pb-2 pb-md-4">No invoices present</h3>
-                  <Link to="/create">
-                    <Button variant="primary">Create Invoice</Button>
-                  </Link>
+                  <div className="d-flex align-items-center justify-content-center gap-4">
+                    <Link to="/create">
+                      <Button variant="primary">Create Invoice</Button>
+                    </Link>
+                    <Link to="/products">
+                      <Button variant="primary" className="d-flex gap-2 align-items-center">
+                        Products
+                        <FaExternalLinkAlt />
+                      </Button>
+                    </Link>
+                  </div>
                 </div>
               ) : (
                 <div className="d-flex flex-column">

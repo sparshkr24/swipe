@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import "bootstrap/dist/css/bootstrap.min.css";
 
+import toast from "react-hot-toast";
 import { Dropdown } from "react-bootstrap";
 import { FaPlus } from "react-icons/fa";
 import Table from "react-bootstrap/Table";
@@ -11,6 +12,7 @@ import { currencyExchange } from "../utils/currencyExchange";
 import { currencySymbolMapping } from "../data/constants";
 import { itemStructure } from "../data/products";
 import { useCurrencyExchangeData, useProductListData } from "../redux/hooks";
+import { validateProductData } from "../utils/validateData";
 import EditableField from "./EditableField";
 import InvoiceItemRow from "../ui/InvoiceItemRow";
 
@@ -23,6 +25,11 @@ const InvoiceItem = ({ allItems, setAllItems, currency, invoiceId }) => {
   const [showSuggestions, setShowSuggestions] = useState(false);
 
   const handleSubmit = useCallback(() => {
+    const { isValid, message } = validateProductData({ product: currentItem })
+    if( !isValid ) {
+      toast.error(message)
+      return
+    }
     const newProductId = lastProductId + 1
     let newItem = currentItem
   
@@ -50,25 +57,31 @@ const InvoiceItem = ({ allItems, setAllItems, currency, invoiceId }) => {
   }, [dispatch, currentItem, setAllItems, lastProductId, invoiceId, currency, exchangeRate]);
   
   const onChange = useCallback((e) => {
-    const { name, value } = e.target
+    const { name, value } = e.target;
     setCurrentItem((prev) => {
-      return {...prev, [name]: value}
-    })
-
+      return { ...prev, [name]: value };
+    });
+  
     if (name === "name") {
       const filteredSuggestions = productList.filter((item) =>
-        item.name.toLowerCase().includes(value.toLowerCase())
+        item.name.toLowerCase().includes(value.toLowerCase()) &&
+        !allItems.some((existingItem) => existingItem.id === item.id)
       );
-
+  
       setSuggestions(filteredSuggestions);
       setShowSuggestions(true);
     }
-  }, [productList])
+  }, [productList, allItems]);  
 
   const handleSuggestionClick = useCallback((item) => {
-    setCurrentItem(item);
+    const afterConversion = currencyExchange({ 
+      fromCurrency: 1, 
+      toCurrency: exchangeRate[currencySymbolMapping[currency]], 
+      data: item 
+    })
+    setCurrentItem(afterConversion);
     setShowSuggestions(false);
-  },[setCurrentItem]);
+  },[setCurrentItem, currency, exchangeRate]);
 
   useEffect(()=>{
     if (!currentItem.name) {

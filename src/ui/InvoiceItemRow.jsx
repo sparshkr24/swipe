@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useDispatch } from 'react-redux'
 
+import toast from 'react-hot-toast'
 import Button from 'react-bootstrap/Button'
 import ButtonGroup from 'react-bootstrap/ButtonGroup'
 import Form from 'react-bootstrap/Form'
@@ -13,6 +14,7 @@ import { currencySymbolMapping } from '../data/constants'
 import { deleteAssociatedId, updateEditState, updateProduct } from '../redux/productsSlice'
 import { useCurrencyExchangeData } from '../redux/hooks'
 import { useProductListData } from '../redux/hooks'
+import { validateProductData } from '../utils/validateData'
 
 const InvoiceItemRow = ({ item, currency, allItems, setAllItems, invoiceId }) => {
   const dispatch = useDispatch()
@@ -38,6 +40,12 @@ const InvoiceItemRow = ({ item, currency, allItems, setAllItems, invoiceId }) =>
   }, [dispatch, allItems, setAllItems, invoiceId])
   
   const handleSubmit = useCallback(() => {
+    const { isValid, message } = validateProductData({ product: editedProduct })
+    if( !isValid ) {
+      toast.error(message)
+      return
+    }
+
     dispatch(updateEditState({ value: null }))
     let afterConversion = editedProduct
     if (exchangeRate) {

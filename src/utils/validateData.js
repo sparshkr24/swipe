@@ -48,3 +48,24 @@ export const validateInvoiceData = ({ invoice }) => {
     isValid: true
   };
 };
+
+export const validateProductData = ({ product }) => {
+  const requiredFields = [
+    'name',
+    'price',
+    'quantity',
+  ];
+
+  for (const field of requiredFields) {
+    if (!product[field] && product[field] !== 0 && product[field] !== false) {
+      return {
+        isValid: false,
+        message: `${field} is required`
+      }
+    }
+  }
+
+  return {
+    isValid: true
+  }
+}
