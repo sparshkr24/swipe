@@ -116,7 +116,6 @@ const InvoiceRow = ({ invoice, navigate, getAllProductsByInvoiceId }) => {
   useEffect(() => {
     const allItems = getAllProductsByInvoiceId({ invoiceId: invoice.id })
     const updatedInvoice = handleCalculateTotal({ allItems, data: invoice })
-    console.log("updatedInvoice: ", updatedInvoice);
     dispatch(updateInvoice({ updatedInvoice }))
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch])

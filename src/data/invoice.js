@@ -18,6 +18,6 @@ export const getInvoiceStructure = (listSize) => ({
   taxAmount: "0.00",
   discountRate: "",
   discountAmount: "0.00",
-  currency: "$",
+  currency: "US$",
   products: [],
 })

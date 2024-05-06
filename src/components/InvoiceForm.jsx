@@ -11,12 +11,13 @@ import InputGroup from "react-bootstrap/InputGroup";
 import Row from "react-bootstrap/Row";
 
 import { addInvoice, updateInvoice } from "../redux/invoicesSlice";
-import { currencyOptions } from "../data/constants";
+import { currencyExchange } from "../utils/currencyExchange";
+import { currencyOptions, currencySymbolMapping } from "../data/constants";
 import { getCurrencyExchangeData } from "../redux/currencyExchangeSlice";
 import { getInvoiceStructure } from "../data/invoice";
 import { handleCalculateTotal } from "../utils/calculateTotal";
 import { openInvoiceModal } from "../redux/invoiceModalSlice";
-import { useInvoiceListData } from "../redux/hooks";
+import { useCurrencyExchangeData, useInvoiceListData } from "../redux/hooks";
 import generateRandomId from "../utils/generateRandomId";
 import GoBackButton from "../ui/GoBackButton"
 import InvoiceItem from "./InvoiceItem";
@@ -31,6 +32,7 @@ const InvoiceForm = () => {
 
   const [copyId, setCopyId] = useState("");
   const { getOneInvoice, getAllProductsByInvoiceId, listSize } = useInvoiceListData();
+  const { exchangeRate } = useCurrencyExchangeData()
   const [allItems, setAllItems] = useState(getAllProductsByInvoiceId({ invoiceId: params.id }))
   const [formData, setFormData] = useState(
     isEdit
@@ -89,9 +91,17 @@ const InvoiceForm = () => {
     updateTotalAmount();
   };
 
-  const onCurrencyChange = (selectedOption) => {
-    setFormData({ ...formData, currency: selectedOption.currency });
-  };
+  const onCurrencyChange = useCallback(({ currency }) => {
+    if (exchangeRate) {
+      setAllItems(prev => currencyExchange({ 
+        fromCurrency: exchangeRate[currencySymbolMapping[formData.currency]], 
+        toCurrency: exchangeRate[currencySymbolMapping[currency]], 
+        data: prev 
+      }));
+    }
+    // set oldCurrency, then updated newCurrency
+    setFormData({ ...formData, currency });
+  }, [exchangeRate, formData]);
 
   const openModal = (event) => {
     event.preventDefault();
@@ -321,6 +331,7 @@ const InvoiceForm = () => {
                     }
                     className="btn btn-light my-1"
                     aria-label="Change Currency"
+                    defaultValue={formData.currency}
                   >
                     {currencyOptions.map(option => (
                       <option key={option.label} value={option.value}>

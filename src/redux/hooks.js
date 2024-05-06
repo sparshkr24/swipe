@@ -1,12 +1,16 @@
 import { useSelector } from "react-redux";
 
-import { selectInvoiceModalData } from "./invoiceModalSlice";
+import { selectCurrencyExchange } from "./currencyExchangeSlice";
 import { selectInvoiceList } from "./invoicesSlice";
+import { selectInvoiceModalData } from "./invoiceModalSlice";
 import { selectProductList } from "./productsSlice";
+import { currencyExchange } from "../utils/currencyExchange";
+import { currencySymbolMapping } from "../data/constants";
 
 export const useInvoiceListData = () => {
   const invoiceList = useSelector(selectInvoiceList);
   const { getProductById } = useProductListData();
+  const { exchangeRate } = useCurrencyExchangeData()
 
   const getOneInvoice = ({ invoiceId }) => {
     invoiceId = parseInt(invoiceId);
@@ -16,20 +20,28 @@ export const useInvoiceListData = () => {
   };  
 
   const getAllProductsByInvoiceId = ({ invoiceId }) => {
-    const { products: invoiceProducts } = getOneInvoice({ invoiceId }) || {}
+    const { products: invoiceProducts, currency } = getOneInvoice({ invoiceId }) || {}
     const allProducts = invoiceProducts?.map(({ id, quantity }) => {
       const productFromStore = getProductById({ productId: id });
       if (productFromStore) {
         return {
           ...productFromStore,
-          quantity
+          quantity,
         };
       }
       
       return null;
     }).filter(product => product !== null);
 
-    return allProducts || []
+    let afterCurrencyConversion = allProducts
+    if (exchangeRate) {
+      afterCurrencyConversion = currencyExchange({
+        toCurrency: exchangeRate[currencySymbolMapping[currency]], 
+        data: allProducts 
+      })
+    }
+    
+    return afterCurrencyConversion || []
   }
 
   const listSize = invoiceList.length;
@@ -78,3 +90,13 @@ export const useInvoiceModalData = () => {
     items: items || itemsFromInvoice
   };
 };
+
+export const useCurrencyExchangeData = () => {
+  const { data: exchangeRate, loading, error } = useSelector(selectCurrencyExchange)
+
+  return {
+    exchangeRate,
+    loading,
+    error
+  }
+}

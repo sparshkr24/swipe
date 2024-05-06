@@ -7,13 +7,16 @@ import { FaPlus } from "react-icons/fa";
 import Table from "react-bootstrap/Table";
 
 import { addProduct } from "../redux/productsSlice";
+import { currencyExchange } from "../utils/currencyExchange";
+import { currencySymbolMapping } from "../data/constants";
 import { itemStructure } from "../data/products";
-import { useProductListData } from "../redux/hooks";
+import { useCurrencyExchangeData, useProductListData } from "../redux/hooks";
 import EditableField from "./EditableField";
 import InvoiceItemRow from "../ui/InvoiceItemRow";
 
 const InvoiceItem = ({ allItems, setAllItems, currency, invoiceId }) => {
   const dispatch = useDispatch()
+  const { exchangeRate } = useCurrencyExchangeData()
   const { productList, lastProductId } = useProductListData()
   const [currentItem, setCurrentItem] = useState(itemStructure)
   const [suggestions, setSuggestions] = useState([]);
@@ -27,7 +30,15 @@ const InvoiceItem = ({ allItems, setAllItems, currency, invoiceId }) => {
       newItem = { ...currentItem, id: newProductId }
     }
 
-    dispatch(addProduct({ newProduct: newItem, invoiceId }));
+    let afterConversion = newItem
+    if (exchangeRate) {
+        afterConversion = currencyExchange({ 
+        fromCurrency: exchangeRate[currencySymbolMapping[currency]], 
+        toCurrency: 1, 
+        data: newItem 
+      })
+    }
+    dispatch(addProduct({ newProduct: afterConversion, invoiceId }));
     setAllItems((prev) => {
       return [
         ...prev,
@@ -36,7 +47,7 @@ const InvoiceItem = ({ allItems, setAllItems, currency, invoiceId }) => {
     });
 
     setCurrentItem(itemStructure);
-  }, [dispatch, currentItem, setAllItems, lastProductId, invoiceId]);
+  }, [dispatch, currentItem, setAllItems, lastProductId, invoiceId, currency, exchangeRate]);
   
   const onChange = useCallback((e) => {
     const { name, value } = e.target
@@ -86,11 +97,11 @@ const InvoiceItem = ({ allItems, setAllItems, currency, invoiceId }) => {
             showSuggestions={showSuggestions}
             handleSuggestionClick={handleSuggestionClick}
           />
-          {allItems.map((product)=>{
+          {allItems.map((item)=>{
             return (
               <InvoiceItemRow 
-                key={product.id} 
-                product={product} 
+                key={item.id} 
+                item={item} 
                 currency={currency}
                 allItems={allItems}
                 setAllItems={setAllItems}
